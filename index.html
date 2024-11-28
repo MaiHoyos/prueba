@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjuntar y Visualizar Archivo</title>
     <title>Plan de Trabajo Anual</title>
     <style>
         body {
@@ -146,6 +149,41 @@ h2 {
 .rectangular-section p {
     line-height: 1.6; /* Para mejorar la legibilidad del texto */
 }
+
+ 
+       /* Estilo para el botón cuadrado con esquinas redondeadas y color modificado */
+.square-button {
+    width: 20px;
+    height: 20px;
+    background-color: #32afe9; /* Cambié el color de fondo */
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    line-height: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px; /* Esto hace que las esquinas sean redondeadas */
+}
+
+.square-button:hover {
+    background-color: #2da1d6; /* Si quieres mantener el color verde en hover */
+}
+
+
+/* Estilo para el botón "Ver" sin fondo ni borde */
+.view-button {
+    background: none;  /* Sin fondo */
+    border: none;      /* Sin borde */
+    color: #007bff;    /* Color del texto */
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.view-button:hover {
+    text-decoration: underline;  /* Subrayar al pasar el mouse */
+}
+		
+		
     </style>
     
 </head>
@@ -266,19 +304,29 @@ h2 {
                     <td contenteditable="true" id="cell5" oninput="calculateSum3()"></td>
                     <td id="resultCell"></td>
                     <td onclick="openModal(this)">Click para editar el horario</td>
-                    <td>
-            <!-- Contenedor del clip -->
-            <div style="position: relative; display: inline-block;">
-                <!-- Ícono de clip -->
-                <i class="clip-icon" style="cursor: pointer;">📎</i>
-                <!-- Input de archivo oculto -->
-                <input type="file" style="display: none;" id="fileInput" />
-            </div>
-        </td>
+					<td>
+						<!-- Botón cuadrado para adjuntar archivos -->
+						<button class="square-button attachButton" onclick="openFileInput(this)">+</button>
+						<!-- Input de archivo oculto -->
+						<input type="file" class="fileInput" style="display: none;" />
+						<!-- Botón de texto para visualizar archivo -->
+						<button class="view-button" title="Descargar archivo">Ver</button>
+					</td>
+
+
+
+
 					<td contenteditable="true"class="oculto"></td>
                     
                 </tr>
+				<tr>
+					<td colspan="8" style="text-align: right;">Total horas</td>
+					<td id="totalHoras" contenteditable="true"></td>
+					<td contenteditable="true"></td>
+					<td contenteditable="true"></td>
+				<tr>
                 <tr>
+							
                     <td colspan="11" style="text-align: right;">
                         <button onclick="insertarFila6(this)">Añadir Fila</button>
                     </td>
@@ -979,17 +1027,7 @@ h2 {
         }
     }
 
-  function calculateSum3() {
-    // Obtiene los valores de las celdas
-    let cell4Value = parseFloat(document.getElementById('cell4').innerText) || 0;
-    let cell5Value = parseFloat(document.getElementById('cell5').innerText) || 0;
-    
-    // Suma los valores y los multiplica por 22
-    let result = (cell4Value + cell5Value) * 22;
-    
-    // Muestra el resultado en la celda correspondiente
-    document.getElementById('resultCell').innerText = result;
-  }
+  
 
 
 
@@ -1316,21 +1354,25 @@ function insertarFila6(button) {
         <td contenteditable="true" id="${cell5Id}" oninput="calculateSum('${cell4Id}', '${cell5Id}', '${resultCellId}')"></td>
         <td id="${resultCellId}"></td>
         <td onclick="openModal(this)">Click para editar el horario</td>
-        <td contenteditable="true"></td>
-        <td contenteditable="true" class="oculto"></td>
+        <td>
+            <!-- Botón cuadrado para adjuntar archivos -->
+            <button class="square-button attachButton" onclick="openFileInput(this)">+</button>
+            <!-- Input de archivo oculto -->
+            <input type="file" class="fileInput" style="display: none;" />
+            <!-- Botón de texto para visualizar archivo -->
+            <button class="view-button" title="Descargar archivo">Ver</button>
+        </td>
     `;
 
-    // Navegar correctamente al tbody que contiene la fila actual
-    let filaActual = button.closest('tr');
-    filaActual.parentNode.insertBefore(nuevaFila, filaActual);
-}
+    // Localizar la fila de "Total horas año"
+    let filaTotalHoras = document.querySelector('tr td[colspan="8"]');
+    if (filaTotalHoras) {
+        // Insertar la nueva fila justo antes de la fila de "Total horas año"
+        filaTotalHoras.closest('tr').parentNode.insertBefore(nuevaFila, filaTotalHoras.closest('tr'));
+    }
 
-
-function calculateSum(cell4Id, cell5Id, resultCellId) {
-    let cell4Value = parseFloat(document.getElementById(cell4Id).innerText) || 0;
-    let cell5Value = parseFloat(document.getElementById(cell5Id).innerText) || 0;
-    let result = (cell4Value + cell5Value) * 22;
-    document.getElementById(resultCellId).innerText = result;
+    // Actualizar el total de horas
+    calculateTotalHoras();
 }
 
 
@@ -1421,21 +1463,96 @@ function obtenerEstilos() {
     return estilos;
 }
 
- // Asegurarse de que el evento está correctamente asociado
-    document.querySelector('.clip-icon').addEventListener('click', function () {
-        const fileInput = document.getElementById('fileInput');
-        if (fileInput) {
-            fileInput.click(); // Disparar el input file
+ 
+let fileUrl = null; // Variable para almacenar la URL del archivo
+
+// Función para abrir el selector de archivos
+function openFileInput(button) {
+    const parentCell = button.parentElement; // Obtener la celda padre
+    const fileInput = parentCell.querySelector('.fileInput');
+    if (fileInput) {
+        fileInput.click(); // Abrir el input de archivo
+    } else {
+        console.error("No se encontró el elemento <input type='file'>");
+    }
+}
+
+document.addEventListener('change', function (event) {
+    const fileInput = event.target;
+    if (fileInput.classList.contains('fileInput')) {
+        const file = fileInput.files[0];
+        if (file) {
+            console.log(`Archivo seleccionado: ${file.name}`); // Depuración
+
+            // Crear una URL temporal para el archivo
+            fileUrl = URL.createObjectURL(file);
+            console.log(`URL del archivo generado: ${fileUrl}`); // Depuración
+
+            // Asignar la función para descargar el archivo al hacer clic en "Ver"
+            const parentCell = fileInput.parentElement;
+            const viewButton = parentCell.querySelector('.view-button');
+            
+            if (viewButton) {
+                // Iniciar la descarga al hacer clic en "Ver"
+                viewButton.onclick = function () {
+                    const link = document.createElement('a');
+                    link.href = fileUrl;  // La URL temporal del archivo
+                    link.download = file.name;  // Nombre del archivo al descargar
+                    link.click();  // Inicia la descarga
+                    console.log("Archivo descargado: " + file.name); // Depuración
+                };
+            } else {
+                console.error('No se encontró el botón "Ver".');
+            }
         } else {
-            console.error("Input de archivo no encontrado");
+            alert("No se seleccionó archivo.");
+            console.log("No se seleccionó archivo."); // Depuración
         }
+    }
+});
+function calculateSum3() {
+    // Obtiene los valores de las celdas
+    let cell4Value = parseFloat(document.getElementById('cell4').innerText) || 0;
+    let cell5Value = parseFloat(document.getElementById('cell5').innerText) || 0;
+    
+    // Suma los valores y los multiplica por 22
+    let result = (cell4Value + cell5Value) * 22;
+    
+    // Muestra el resultado en la celda correspondiente
+    document.getElementById('resultCell').innerText = result;
+  }
+  
+function calculateSum(cell4Id, cell5Id, resultCellId) {
+    let cell4Value = parseFloat(document.getElementById(cell4Id).innerText) || 0;
+    let cell5Value = parseFloat(document.getElementById(cell5Id).innerText) || 0;
+    let result = (cell4Value + cell5Value) * 22;
+    document.getElementById(resultCellId).innerText = result;
+
+    // Actualizar el total de horas
+    calculateTotalHoras();
+}
+
+function calculateTotalHoras() {
+    let total = 0;
+
+    // Seleccionar todas las celdas con IDs que empiezan con 'resultCell' o que sean exactamente 'resultCell'
+    document.querySelectorAll('[id^="resultCell"], #resultCell').forEach(cell => {
+        let value = parseFloat(cell.innerText) || 0; // Convertir texto a número o usar 0 si está vacío
+        total += value;
     });
 
-    // Opcional: Mostrar el archivo seleccionado
-    document.getElementById('fileInput').addEventListener('change', function () {
-        const fileName = this.files[0]?.name || "No se seleccionó archivo";
-        alert(`Archivo seleccionado: ${fileName}`);
-    });
+    // Actualizar la celda de total horas
+    let totalHorasCell = document.getElementById('totalHoras');
+    if (totalHorasCell) {
+        totalHorasCell.innerText = total; // Mostrar el total calculado
+    } else {
+        console.error('Celda de total horas no encontrada. Asegúrate de que exista un elemento con id="totalHoras".');
+    }
+}
+
+
+
+
 	
     </script>
     </body>
