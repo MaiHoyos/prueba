@@ -657,6 +657,36 @@ h2 {
                 <td colspan="12" style="text-align: right;"><button style="border: none;" onclick="insertarFila2(this)">Añadir Fila</button></td>		
             </tr>
 			
+			<!-- Subsección Otros -->
+			<tr class="sub-header">
+					<td colspan="12" style="background-color: #f2f2f2;">Otros</td>
+			</tr>
+			<tr>
+				<th>N° Acta</th>
+				<th colspan="2">Tipo de actividad</th>
+				<th>Descripción</th>
+				<th>Proyecto asociado</th>
+				<th>Fecha de inicio</th>
+				<th>Fecha de finalización</th>
+				<th>Horas semanales</th>
+				<th>Horas semestre</th>
+				<th>Horas año</th>
+				<th>EVIDENCIA (si lo requiere)</th>
+				<th style="color: red;" class="oculto">Autoevaluación / Porcentaje de avance</th>
+			</tr>
+
+
+			<tr>
+                <td colspan="12" style="text-align: right;"><button style="border: none;" onclick="insertarFila2(this)">Añadir Fila</button></td>		
+            </tr>
+			<tr>
+				<td colspan="8" style="text-align: right;">Total horas</td>
+				<td id="Totalhoras2"></td>
+				<td contenteditable="true"></td>
+				<td contenteditable="true"></td>
+			</tr>
+
+			
         </tbody>
 </table>			
  
@@ -1165,6 +1195,8 @@ function insertarFila(button) {
     // Navegar correctamente al tbody que contiene la fila actual
     let filaActual = button.closest('tr');
     filaActual.parentNode.insertBefore(nuevaFila, filaActual);
+	
+	
 }
 	
 function calculateSum2(cellId) {
@@ -1179,6 +1211,9 @@ function calculateSum2(cellId) {
 
     // Muestra el resultado en la celda correspondiente
     document.getElementById(resultCellId).innerText = result;
+	
+	// Recalcular el total
+    sumarResultadosInvestigacion();
 }
 
 
@@ -1266,6 +1301,9 @@ function calculateSum2(cellId) {
 
     // Muestra el resultado en la celda correspondiente
     document.getElementById(resultCellId).innerText = result;
+	// Recalcular el total
+    sumarResultadosInvestigacion();
+	
 }
 
 function insertarFila4(button) {
@@ -1550,6 +1588,25 @@ function calculateTotalHoras() {
     }
 }
 
+function sumarResultadosInvestigacion() {
+    // Seleccionar todas las celdas de resultados relevantes (IDs que comienzan con 'resultCell')
+    let celdasResultados = document.querySelectorAll('[id^="resultCell"]');
+    let sumaTotal = 0;
+
+    // Recorrer las celdas y sumar los valores numéricos
+    celdasResultados.forEach(celda => {
+        let valor = parseFloat(celda.innerText) || 0; // Manejar valores no numéricos
+        sumaTotal += valor;
+    });
+
+    // Mostrar el total en la celda específica
+    let celdaResumen = document.getElementById('Totalhoras2');
+    if (celdaResumen) {
+        celdaResumen.innerText = sumaTotal;
+    } else {
+        console.warn('No se encontró la celda con ID "Totalhoras2" para mostrar la suma.');
+    }
+}
 
 
 
